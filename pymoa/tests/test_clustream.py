@@ -29,7 +29,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 print(sys.path)
 
 from metrics.metrics import F1_score_P, F1_score_R, purity_score
-from models.clustream import Clustream
+from models.clustering.clustream import Clustream
 
 class TestDenStream(unittest.TestCase):
     def setUp(self):
