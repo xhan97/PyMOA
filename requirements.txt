@@ -1,0 +1,6 @@
+numpy>=1.25.2
+pip>=23.2.1
+py4j>=0.10.9.7
+scikit_learn>=1.2.0
+setuptools>=68.0.0
+six>=1.16.0
