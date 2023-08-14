@@ -16,13 +16,13 @@ import logging
 from typing import Dict, List, Iterable, Any
 
 
-from utils import setup_logger, setup_java_gateway
+from pymoa.utils.utils import setup_logger, setup_java_gateway
 
 _LOGGER = setup_logger("clustree", logging.DEBUG)
 
 
-from base import BaseClustering
-from base import _IMPORTS
+from .base import BaseClustering
+from .base import _IMPORTS
 
 _IMPORTS = _IMPORTS + [
     "moa.clusterers.clustream.WithKmeans",

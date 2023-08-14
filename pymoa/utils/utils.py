@@ -9,7 +9,7 @@ from py4j.java_gateway import (
     java_import,
 )
 
-from dependencies import _CLASS_PATH
+from .dependencies import _CLASS_PATH
 
 
 def setup_logger(name: str, level) -> logging.Logger:

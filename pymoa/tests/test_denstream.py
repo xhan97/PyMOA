@@ -28,7 +28,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 print(sys.path)
 
-from models.denstream import DenStreamWithDBSCAN
+from models.clustering.denstream import DenStreamWithDBSCAN
 from metrics.metrics import F1_score_P, F1_score_R, purity_score
 
 

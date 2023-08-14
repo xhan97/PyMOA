@@ -28,19 +28,21 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 print(sys.path)
 
-from models.clustree import Clustree
+from models.clustering.clustree import Clustree
+from sklearn.utils import shuffle
 from metrics.metrics import F1_score_P, F1_score_R, purity_score
 
 
 class TestDenStream(unittest.TestCase):
     def setUp(self):
         self.data, self.lables = load_wine(return_X_y=True)
+        self.data, self.lables = shuffle(self.data, self.lables, random_state=3)
 
         self.clf = Clustree(
             dimensions=len(self.data[0]),
             num_classes=3,
-            window_range=15,
-            max_height=20,
+            window_range=10,
+            max_height=8,
         )
 
     def test_fit_predict(self):

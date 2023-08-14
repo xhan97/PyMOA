@@ -23,6 +23,7 @@ import numpy as np
 from sklearn.datasets import load_iris, load_wine, load_diabetes
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import f1_score
+
 # temporary solution for relative imports in case pyod is not installed
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
@@ -30,17 +31,20 @@ print(sys.path)
 
 from metrics.metrics import F1_score_P, F1_score_R, purity_score
 from models.clustering.clustream import Clustream
+from sklearn.utils import shuffle
+
 
 class TestDenStream(unittest.TestCase):
     def setUp(self):
         self.data, self.lables = load_wine(return_X_y=True)
         self.data = MinMaxScaler().fit_transform(self.data)
+        self.data, self.lables = shuffle(self.data, self.lables, random_state=3)
         self.clf = Clustream(
             dimensions=len(self.data[0]),
-            num_classes= 3,
+            num_classes=3,
             time_window=50,
             max_num_kernels=5,
-            kernel_radius=8,    
+            kernel_radius=8,
             k=3,
         )
 
