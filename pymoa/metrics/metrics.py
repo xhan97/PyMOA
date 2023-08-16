@@ -19,7 +19,6 @@ from py4j.java_gateway import JavaGateway
 from py4j.java_gateway import java_import
 from sklearn import metrics
 import numpy as np
-from sklearn.metrics import f1_score
 
 
 def get_contingency_matrix(y_true, y_pred):
@@ -32,49 +31,49 @@ def get_contingency_matrix(y_true, y_pred):
 
 
 def purity_score(y_true, y_pred):
-    mm = get_contingency_matrix(y_true, y_pred)
+    ctm = get_contingency_matrix(y_true, y_pred)
     # return purity
-    return np.sum(np.amax(mm, axis=0)) / np.sum(mm)
+    return np.sum(np.amax(ctm, axis=0)) / np.sum(ctm)
 
 
 def F1_score_P(y_true, y_pred):
     """
     F1 as defined in P3C, try using F1 optimization
     """
-    mm = get_contingency_matrix(y_true, y_pred)
+    ctm = get_contingency_matrix(y_true, y_pred)
 
-    max_index = np.argmax(mm, axis=0)
+    max_index = np.argmax(ctm, axis=0)
     F1_P = 0.0
 
-    for j in range(mm.shape[1]):
-        precision = mm[max_index[j], j] / sum(mm[:, j])
-        recall = mm[max_index[j], j] / sum(mm[max_index[j], :])
+    for j in range(ctm.shape[1]):
+        precision = ctm[max_index[j], j] / sum(ctm[:, j])
+        recall = ctm[max_index[j], j] / sum(ctm[max_index[j], :])
         f1 = 0.0
         if precision > 0 and recall > 0:
             f1 = 2 * precision * recall / (precision + recall)
         F1_P += f1
-    F1_P /= mm.shape[1]
+    F1_P /= ctm.shape[1]
     return F1_P
 
 
 def F1_score_R(y_true, y_pred):
     """
     F1 as defined in .... mainly maximizes F1 for each class"""
-    mm = get_contingency_matrix(y_true, y_pred)
+    ctm = get_contingency_matrix(y_true, y_pred)
 
     F1_R = 0.0
-    for i in range(mm.shape[0]):
+    for i in range(ctm.shape[0]):
         max_f1 = 0.0
-        for j in range(mm.shape[1]):
-            precision = mm[i, j] / sum(mm[:, j])
-            recall = mm[i, j] / sum(mm[i, :])
+        for j in range(ctm.shape[1]):
+            precision = ctm[i, j] / sum(ctm[:, j])
+            recall = ctm[i, j] / sum(ctm[i, :])
             f1 = 0.0
             if precision > 0 and recall > 0:
                 f1 = 2 * precision * recall / (precision + recall)
             if f1 > max_f1:
                 max_f1 = f1
         F1_R += max_f1
-    F1_R /= mm.shape[0]
+    F1_R /= ctm.shape[0]
 
     return F1_R
 

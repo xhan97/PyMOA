@@ -32,12 +32,15 @@ print(sys.path)
 from metrics.metrics import F1_score_P, F1_score_R, purity_score
 from models.clustering.clustream import Clustream
 from sklearn.utils import shuffle
+from IsoKernel import IsoKernel
 
 
 class TestDenStream(unittest.TestCase):
     def setUp(self):
         self.data, self.lables = load_wine(return_X_y=True)
         self.data = MinMaxScaler().fit_transform(self.data)
+        ik = IsoKernel(n_estimators=200, max_samples=8)
+        self.data = ik.fit_transform(self.data)
         self.data, self.lables = shuffle(self.data, self.lables, random_state=3)
         self.clf = Clustream(
             dimensions=len(self.data[0]),

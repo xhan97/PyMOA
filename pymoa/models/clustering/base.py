@@ -17,8 +17,9 @@ from typing import Any, Dict, Iterable, List
 import numpy as np
 
 import six
-from py4j.java_gateway import JavaGateway
+from py4j.java_gateway import JavaGateway, JavaObject
 from sklearn.base import BaseEstimator, ClusterMixin
+import time
 
 _IMPORTS = [
     "com.yahoo.labs.samoa.instances.SparseInstance",
@@ -61,6 +62,7 @@ class BaseClustering(BaseEstimator, ClusterMixin):
         self._instances: List[Any] = []
         self._found_clustering: Any = None
         self._m_timestamp = 0
+        self._last_instance: Any = None
 
     @property
     def dimension(self) -> float:
@@ -83,6 +85,10 @@ class BaseClustering(BaseEstimator, ClusterMixin):
     @property
     def found_clustering(self) -> Any:
         return self._found_clustering
+
+    @property
+    def last_instance(self) -> Any:
+        return self._last_instance
 
     def _generate_header(self):
         """
@@ -120,10 +126,13 @@ class BaseClustering(BaseEstimator, ClusterMixin):
     def _create_instance(self, vector: Iterable[float], y: int = None) -> Any:
         """Create instance."""
         instance = self._gateway.jvm.DenseInstance(float(self._dimensions))
+        
+        st = time.time()
 
         for index, number in enumerate(vector):
             instance.setValue(index, number)
-
+        et = time.time()
+        print("setValue time: ", et - st)
         instance.setDataset(self._header)
 
         if y is not None:
@@ -131,18 +140,12 @@ class BaseClustering(BaseEstimator, ClusterMixin):
 
         return instance
 
-    def _create_instances(self, X, lables):
-        if lables is None:
-            instances = [self._create_instance(vector) for vector in X]
-        else:
-            instances = [
-                self._create_instance(vector, y=y) for vector, y in zip(X, lables)
-            ]
-
-        return instances
-
     def _reset_clusterering(self):
         self._found_clustering = None
+        return self
+
+    def _reset_instances(self):
+        self._instances = []
         return self
 
     def _get_clustering(self):
@@ -173,16 +176,22 @@ class BaseClustering(BaseEstimator, ClusterMixin):
 
         :param X: An iterable of vectors.
         """
+        st = time.time()
         instance = self._create_instance(x, y=y)
-        point = self._gateway.jvm.DataPoint(instance, self._m_timestamp)
-        if y is not None:
-            instance.deleteAttributeAt(point.classIndex())
+        et = time.time()
+        print("create instance time: ", et - st)
+        # point = self._gateway.jvm.DataPoint(instance, self._m_timestamp)
+        # if y is not None:
+        #     instance.deleteAttributeAt(point.classIndex())
+        st = time.time()
         self._clusterer.trainOnInstanceImpl(instance)
+        et = time.time()
+        print("trainOnInstanceImpl time: ", et - st)
         self._m_timestamp += 1
 
         if self._found_clustering is not None:
             self._reset_clusterering()
-
+        self._last_instance = instance
         return self
 
     def learn_batch(self, X: Iterable[Iterable[float]], lables: Iterable[int] = None):
@@ -195,22 +204,26 @@ class BaseClustering(BaseEstimator, ClusterMixin):
         if lables is None:
             for vector in X:
                 self.learn_one(vector)
+                self._instances.append(self.last_instance)
         else:
             for vector, y in zip(X, lables):
                 self.learn_one(vector, y=y)
-
+                self._instances.append(self.last_instance)
         return self
 
     def predict_one(self, x: Iterable[float], y: int = None) -> int:
+        covered = False
+        label = 0
+        min_distance = np.inf
         if self._found_clustering is None:
             found_clustering = self._get_clustering()
         else:
             found_clustering = self._found_clustering
+        if isinstance(x, JavaObject):
+            instance = x
+        else:
+            instance = self._create_instance(x, y=y)
 
-        instance = self._create_instance(x)
-        covered = False
-        label = 0
-        min_distance = np.inf
         for c in range(found_clustering.size()):
             prob = found_clustering.get(c).getInclusionProbability(instance)
             if prob >= 1:
@@ -240,6 +253,19 @@ class BaseClustering(BaseEstimator, ClusterMixin):
 
         :param X: An iterable of vectors.
         """
+        st = time.time()
         clf = self.learn_batch(X, lables=lables)
+        et = time.time()
+        print("fit time: ", et - st)
+        
+        return clf.predict_batch(self._instances, lables=lables)
 
-        return clf.predict_batch(X, lables=lables)
+    def fit_predict_one(self, x: Iterable[float], y: int = None) -> int:
+        """
+        Partial fit model.
+
+        :param X: An iterable of vectors.
+        """
+        clf = self.learn_one(x, y=y, return_instance=True)
+
+        return clf.predict_one(clf.last_instance, y=y)

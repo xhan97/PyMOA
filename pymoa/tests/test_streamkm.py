@@ -17,9 +17,7 @@
 import os
 import sys
 import unittest
-import numpy as np
 
-# noinspection PyProtectedMember
 from sklearn.datasets import load_iris, load_wine, load_diabetes
 from sklearn.preprocessing import MinMaxScaler
 
@@ -30,13 +28,20 @@ print(sys.path)
 
 from models.clustering.streamkm import StreamKM
 from metrics.metrics import F1_score_P, F1_score_R, purity_score
+from IsoKernel import IsoKernel
+import time
 
 
 class TestDenStream(unittest.TestCase):
     def setUp(self):
         self.data, self.lables = load_wine(return_X_y=True)
         self.data = MinMaxScaler().fit_transform(self.data)
-
+        
+        # ik = IsoKernel(n_estimators=200, max_samples=8)
+        # st_time = time.time()
+        # self.data = ik.fit_transform(self.data)
+        # et_time = time.time()
+        # print("IsoKernel time: ", et_time - st_time)
         self.clf = StreamKM(
             dimensions=len(self.data[0]),
             num_classes=3,
@@ -47,7 +52,10 @@ class TestDenStream(unittest.TestCase):
         )
 
     def test_fit_predict(self):
+        st_time = time.time()
         pred_labels = self.clf.fit_predict(self.data)
+        et_time = time.time()
+        print("StreamKM time: ", et_time - st_time)
         print(pred_labels)
         print(self.lables)
         purity = purity_score(self.lables, pred_labels)
