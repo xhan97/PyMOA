@@ -127,12 +127,12 @@ class BaseClustering(BaseEstimator, ClusterMixin):
         """Create instance."""
         instance = self._gateway.jvm.DenseInstance(float(self._dimensions))
         
-        st = time.time()
+        # st = time.time()
 
         for index, number in enumerate(vector):
             instance.setValue(index, number)
-        et = time.time()
-        print("setValue time: ", et - st)
+        # et = time.time()
+        # print("setValue time: ", et - st)
         instance.setDataset(self._header)
 
         if y is not None:
@@ -176,17 +176,17 @@ class BaseClustering(BaseEstimator, ClusterMixin):
 
         :param X: An iterable of vectors.
         """
-        st = time.time()
+        # st = time.time()
         instance = self._create_instance(x, y=y)
-        et = time.time()
-        print("create instance time: ", et - st)
-        # point = self._gateway.jvm.DataPoint(instance, self._m_timestamp)
-        # if y is not None:
-        #     instance.deleteAttributeAt(point.classIndex())
-        st = time.time()
+        # et = time.time()
+        # print("create instance time: ", et - st)
+        # # point = self._gateway.jvm.DataPoint(instance, self._m_timestamp)
+        # # if y is not None:
+        # #     instance.deleteAttributeAt(point.classIndex())
+        # st = time.time()
         self._clusterer.trainOnInstanceImpl(instance)
-        et = time.time()
-        print("trainOnInstanceImpl time: ", et - st)
+        # et = time.time()
+        # print("trainOnInstanceImpl time: ", et - st)
         self._m_timestamp += 1
 
         if self._found_clustering is not None:
@@ -253,10 +253,10 @@ class BaseClustering(BaseEstimator, ClusterMixin):
 
         :param X: An iterable of vectors.
         """
-        st = time.time()
+        # st = time.time()
         clf = self.learn_batch(X, lables=lables)
-        et = time.time()
-        print("fit time: ", et - st)
+        # et = time.time()
+        # print("fit time: ", et - st)
         
         return clf.predict_batch(self._instances, lables=lables)
 
