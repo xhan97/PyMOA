@@ -36,7 +36,7 @@ class TestDenStream(unittest.TestCase):
     def setUp(self):
         self.data, self.lables = load_wine(return_X_y=True)
         self.data = MinMaxScaler().fit_transform(self.data)
-        
+
         # ik = IsoKernel(n_estimators=200, max_samples=8)
         # st_time = time.time()
         # self.data = ik.fit_transform(self.data)
